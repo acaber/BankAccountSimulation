@@ -2,10 +2,8 @@
  * File Name: InsufficientFunds.java
  * Author: Rebecca Johnson
  * Date: July 6, 2017
- * Purpose: Simulates a bank account with a GUI that has the capabilities of 
- * 	withdrawing funds from a selected account, depositing funds to a selected account,
- * 	transferring funds to a selected account from the other account, and displaying
- * 	the balance of the selected account.
+ * Purpose: Programmer created exception that is thrown when
+ * 	a bank account has insufficient funds for withdrawals and transfers
  */
 
 //user created exception named InsufficientFunds

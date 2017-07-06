@@ -2,10 +2,7 @@
  * File Name: GUI.java
  * Author: Rebecca Johnson
  * Date: July 6, 2017
- * Purpose: Simulates a bank account with a GUI that has the capabilities of 
- * 	withdrawing funds from a selected account, depositing funds to a selected account,
- * 	transferring funds to a selected account from the other account, and displaying
- * 	the balance of the selected account.
+ * Purpose: Sets up the GUI and assigns the buttons event handlers
  */
 import javax.swing.*;
 import java.awt.*;
@@ -35,6 +32,12 @@ public class GUI extends JFrame implements ActionListener {
 	private static double checkingBalance;
 	private static double savingsBalance;
 	
+	//creates a checking Account object
+	private Account checking;
+		
+	//creates a savings Account object
+	private Account savings;
+		
 	//constructor that builds the GUI
 	public GUI() {
 		
@@ -46,13 +49,9 @@ public class GUI extends JFrame implements ActionListener {
 		setLayout(new BorderLayout());
 		setBackground(Color.lightGray);
 		
-		//creates a checking Account object
-		Account checking;
 		//initializes the checking account balance
 		checking = new Account(1000);
 
-		//creates a savings Account object
-		Account savings;
 		//initializes the savings account balance
 		savings = new Account(5000);
 	
@@ -75,76 +74,38 @@ public class GUI extends JFrame implements ActionListener {
 		withdrawBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { 
 					
-				//calls the isNumericValue method to make sure the input is a number
+				//will execute if the input is a numeric value
 				if(isNumericValue(inputText.getText())) {
 					
-					//calls the isIncrementedBy20 method to make sure the input is an increment of $20
+					//will execute if the input is incremented by $20
 					if(isIncrementedBy20(inputText.getText())){
 						
 						//will execute if the checking radio button is selected
 						if(checkingRadioBtn.isSelected()){
 							
-							//try statement
 							try {
-								//calls withdrawAccount method and sets the return amount to checkingBalance
-								checkingBalance = checking.withdrawAccount(Double.parseDouble(inputText.getText()));
-								
-								//opens JOptionPane to show the results
-								JOptionPane.showMessageDialog(null, String.format("Success! "
-										+ "%nYour new checking account balance is: $%.2f", checkingBalance));
+								setCheckingWithdrawAmount();
+							} catch (InsufficientFunds f) {
+								displayCheckingWithdrawalError(f);
 							}
-							
-							//catch statement
-							catch(InsufficientFunds f) {
-								
-								//opens JOptionPane to output the error
-								JOptionPane.showMessageDialog(null, String.format(	
-										"Error: Insufficient funds available to complete withdrawal. "
-										+ "%n%nAvaiable checking account balance: $%.2f "
-										+ "%nWithdrawal amount request: $%.2f "
-										+ "%nService fee: $%.2f"
-										+ "%nTotal withdrawal amount: $%.2f", 
-										checkingBalance, f.getAmount(), checking.getServiceCharge(), 
-										(f.getAmount() + checking.getServiceCharge())));
-							}				
-						}
+						}				
 							
 						//will execute if the savings radio button is selected
 						else if(savingsRadioBtn.isSelected()) {
 							
-							//try statement
 							try {
-								
-								//calls the withdrawAmount method and sets the return amount to savingsBalance
-								savingsBalance = savings.withdrawAccount(Double.parseDouble(inputText.getText()));
-								
-								//opens JOptionPane to output the results
-								JOptionPane.showMessageDialog(null, String.format("Success! "
-										+ "%nYour new savings account balance is: $%.2f", savingsBalance));
-								}
-							
-							//catch statement
-							catch(InsufficientFunds f) {
-								
-								//opens JOptionPane to output the error
-								JOptionPane.showMessageDialog(null, String.format(
-										"Error: Insufficient funds available to complete withdrawal. "
-												+ "%n%nAvaiable savings account balance: $%.2f "
-												+ "%nWithdrawal amount request: $%.2f "
-												+ "%nService fee: $%.2f"
-												+ "%nTotal withdrawal amount: $%.2f", savingsBalance, 
-												f.getAmount(), savings.getServiceCharge(), (f.getAmount() 
-														+ savings.getServiceCharge())));
+								setSavingsWithdrawAmount();
+							} catch(InsufficientFunds f) {
+								displaySavingsWithdrawalError(f);
 							}
 						}
 					}
 						
 					else
-						JOptionPane.showMessageDialog(null, "Error: input is not an increment of 20");
-				}
-					
+						displayNotIncrementedBy20Error();
+				}	
 				else 
-					JOptionPane.showMessageDialog(null, "Error: input is not a numeric value.");	
+					displayNonNumericError();	
 		}
 	});
 		
@@ -157,32 +118,18 @@ public class GUI extends JFrame implements ActionListener {
 		depositBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { 
 				
-				//calls the isNumericValue method to make sure the input is a number
+				//will execute if the input is a numeric value
 				if(isNumericValue(inputText.getText())) {
 
 					//will execute if the checking radio button is selected
-					if(checkingRadioBtn.isSelected()){
-						
-						//calls the depositAccount method and sets the return value to checkingBalance
-						checkingBalance = checking.depositAccount(Double.parseDouble(inputText.getText()));
-						
-						//opens the JOptionPane to output the results
-						JOptionPane.showMessageDialog(null, String.format("Success! "
-								+ "%nYour new checking account balance is: $%.2f", checkingBalance));
-					}
+					if(checkingRadioBtn.isSelected())
+						setCheckingDepositAmount();
 					
 					//will execute if the savings radio button is selected
-					else if(savingsRadioBtn.isSelected()) {
-						
-						//calls the depositAccount method and sets the return value to savingsBalance
-						savingsBalance = savings.depositAccount(Double.parseDouble(inputText.getText()));
-						
-						//opens the JOptionPane to output the results
-						JOptionPane.showMessageDialog(null, String.format("Success! "
-								+ "%nYour new savings account balance is: $%.2f", savingsBalance));
-					}
+					else if(savingsRadioBtn.isSelected()) 
+						setSavingsDepositAmount();	
 				else 
-					JOptionPane.showMessageDialog(null, "Error: input is not a numeric value.");
+					displayNonNumericError();
 				}
 		      }
 		});
@@ -198,82 +145,33 @@ public class GUI extends JFrame implements ActionListener {
 		transferToBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) { 
 		
-				//calls the isNumericValue method to make sure the input is a number
+				//will execute if the input is a numeric value
 				if(isNumericValue(inputText.getText())) {
 					
 					//will execute if the checking radio button is selected
-					if(checkingRadioBtn.isSelected()){
-						
-						//try statement
+					if(checkingRadioBtn.isSelected()) {
 						try {
-							
-							//calls the transfer method
-							checking.transfer(checking, savings, Double.parseDouble(inputText.getText())); 
-							
-							//sets checkingBalance to its new balance
-							checkingBalance = checking.getBalance();
-							
-							//sets savings balance to its new balance
-							savingsBalance = savings.getBalance();
-							
-							//opens JOptionPane to output results
-							JOptionPane.showMessageDialog(null, String.format("Success! "
-									+ "%nYour new checking account balance is: $%.2f"
-									+ "%nYour new savings account balance is: $%.2f", checkingBalance, savingsBalance));
-						} 
-						
-						//catch statement
-						catch (InsufficientFunds f) {
-							
-							//opens JOptionPane to display the error
-							JOptionPane.showMessageDialog(null, String.format(
-									"Error: Insufficient funds available in savings account to complete transfer. "
-											+ "%n%nAvaiable savings account balance: $%.2f "
-											+ "%nWithdrawal amount request: $%.2f ", 
-											savingsBalance, f.getAmount()));
+							setCheckingTransferBalance();
+							displayTransferAccountBalance();
+						} catch (InsufficientFunds f) {
+							displayCheckingTransferError(f);
 						}
 					}
 					
 					//will execute if the savings radio button is selected
 					else if(savingsRadioBtn.isSelected()) {
-						
-						//try statement
-						try {
-							
-							//calls the transfer method
-							savings.transfer(savings, checking, Double.parseDouble(inputText.getText())); 
-							
-							//sets savingsBalance to its new balance
-							savingsBalance = savings.getBalance();
-							
-							//sets checkingBalance to its new balance
-							checkingBalance = checking.getBalance();
-							
-							//opens JOptionPane to output results
-							JOptionPane.showMessageDialog(null, String.format("Success! "
-									+ "%nYour new savings account balance is: $%.2f"
-									+ "%nYour new checking account balance is: $%.2f", savingsBalance, checkingBalance));
-						} 
-						
-						//catch statement
-						catch (InsufficientFunds f) {
-							
-							//opens JOptionPane to display the error
-							JOptionPane.showMessageDialog(null, String.format(
-									"Error: Insufficient funds available in checking account to complete transfer. "
-											+ "%n%nAvaiable checking account balance: $%.2f "
-											+ "%nWithdrawal amount request: $%.2f ", 
-											checkingBalance, f.getAmount()));
-						}
-						
+						try {	
+							setSavingsTransferBalance();
+							displayTransferAccountBalance();
+						} catch (InsufficientFunds f) {
+							displaySavingsTransferError(f);
+						}		
 					}
-				else 
-					JOptionPane.showMessageDialog(null, "Error: input is not a numeric value.");
 				}
+				else 
+					displayNonNumericError();
 		   }
 		});
-		
-		
 		
 		//balance button specifications
 		balanceBtn = new JButton("Balance");
@@ -286,11 +184,10 @@ public class GUI extends JFrame implements ActionListener {
 				
 				//will execute if the checking radio button is selected
 				if(checkingRadioBtn.isSelected()) 
-					JOptionPane.showMessageDialog(null, String.format("Current checking account balance: $%.2f", checking.getBalance()));
-				
+					displayCheckingAccountBalance();
 				//will execute if the savings radio button is selected
 				else if(savingsRadioBtn.isSelected())
-					JOptionPane.showMessageDialog(null,  String.format("Current savings account balance: $%.2f", savings.getBalance()));
+					displaySavingsAccountBalance();
 			}
 		});
 		
@@ -316,25 +213,19 @@ public class GUI extends JFrame implements ActionListener {
 		inputText.setEditable(true);
 	}
 	
-	//method that checks if the user's input is a number
+	//this method checks if the user's input is a number
 	public boolean isNumericValue(String input) {
 		
-		//try statement
 		try {
-			
-			//tries to convert the input to a double
 			Double.parseDouble(input);
-		}
-		
-		//catch statement
-		catch(NumberFormatException ex) {
+		} catch(NumberFormatException ex) {
 			return false;
 		}
 	
 		return true;
 	}
 	
-	//checks if input is incremented by 20
+	//this method checks if the user's input is incremented by 20
 	public boolean isIncrementedBy20(String input) {
 		
 		//declares and initializes the incrementedBy20 variable
@@ -348,22 +239,192 @@ public class GUI extends JFrame implements ActionListener {
 		return incrementedBy20;
 	}
 	
-	//method displays the GUI
-	public void display() {
-		setVisible(true);
-		
+	//this method sets the new checking account balance after a successful withdrawal
+	public void setCheckingWithdrawAmount() throws InsufficientFunds {
+			
+		//calls withdrawAccount method and sets the return amount to checkingBalance
+		checkingBalance = checking.withdrawAccount(Double.parseDouble(inputText.getText()));
+				
+		displayCheckingBalance();							
 	}
+	
+	//this method sets the new savings account balance after a successful withdrawal
+	public void setSavingsWithdrawAmount() throws InsufficientFunds {
+			
+		//calls the withdrawAmount method and sets the return amount to savingsBalance
+		savingsBalance = savings.withdrawAccount(Double.parseDouble(inputText.getText()));
+			
+		//displays results
+		displaySavingsBalance();
+	}
+	
+	
+	//this method sets the new checking account balance after a successful deposit
+	public void setCheckingDepositAmount() {
+			
+		//calls the depositAccount method and sets the return value to checkingBalance
+		checkingBalance = checking.depositAccount(Double.parseDouble(inputText.getText()));
+			
+		displayCheckingBalance();
+	}
+		
+	//this method sets the new savings account balance after a successful deposit
+	public void setSavingsDepositAmount() {
+			
+		//calls the depositAccount method and sets the return value to savingsBalance
+		savingsBalance = savings.depositAccount(Double.parseDouble(inputText.getText()));
+			
+		displaySavingsBalance();		
+	}
+		
+	
+	//this method sets the new checking account balance after completing a transfer
+	public void setCheckingTransferBalance() throws InsufficientFunds {
+		
+		//calls the transfer method
+		checking.transfer(checking, savings, Double.parseDouble(inputText.getText())); 
+		
+		//sets checkingBalance to its new balance
+		checkingBalance = checking.getBalance();
+		
+		//sets savings balance to its new balance
+		savingsBalance = savings.getBalance();
+	}
+	
+	//this method sets the new savings account balance after completing a transfer
+	public void setSavingsTransferBalance() throws InsufficientFunds {
+		
+		//calls the transfer method
+		savings.transfer(savings, checking, Double.parseDouble(inputText.getText())); 
+		
+		//sets savingsBalance to its new balance
+		savingsBalance = savings.getBalance();
+		
+		//sets checkingBalance to its new balance
+		checkingBalance = checking.getBalance();
+	}
+	
+	//this method displays the new account balances after a successful transfer
+	public void displayTransferAccountBalance() {
+		
+		//opens JOptionPane to output results
+		JOptionPane.showMessageDialog(null, String.format("Success! "
+				+ "%nYour new checking account balance is: $%,.2f"
+				+ "%nYour new savings account balance is: $%,.2f", 
+				checkingBalance, savingsBalance));
+	}
+	
+	//this method displays the current checking account balance
+	public void displayCheckingAccountBalance() {
+		
+		//displays the current checking account balance
+		JOptionPane.showMessageDialog(null, 
+				String.format("Current checking account balance: $%,.2f", checking.getBalance()));
+	}
+	
+	//this method displays the current savings account balance
+	public void displaySavingsAccountBalance() {
+		
+		//displays the current savings account balance
+		JOptionPane.showMessageDialog(null, 
+				String.format("Current savings account balance: $%,.2f", savings.getBalance()));
+	}
+	
+	//this method displays the new balance of the checking account after a withdrawal or deposit
+	public void displayCheckingBalance() {
+		
+		//displays results
+		JOptionPane.showMessageDialog(null, String.format("Success! "
+				+ "%nYour new checking account balance is: $%,.2f", checkingBalance));
+	}
+	
+	//this method displays the new balance of the savings account after a withdrawal or deposit
+	public void displaySavingsBalance() {
+		
+		//displays results
+		JOptionPane.showMessageDialog(null, String.format("Success! "
+				+ "%nYour new savings account balance is: $%,.2f", savingsBalance));
+	}
+	
+	//this method displays the checking withdrawal error
+	public void displayCheckingWithdrawalError(InsufficientFunds f) {
+		
+		//opens JOptionPane to output the error
+		JOptionPane.showMessageDialog(null, String.format(	
+				"Error: Insufficient funds available to complete withdrawal. "
+				+ "%n%nAvaiable checking account balance: $%,.2f "
+				+ "%nWithdrawal amount request: $%,.2f "
+				+ "%nService fee: $%.2f"
+				+ "%nTotal withdrawal amount: $%,.2f", 
+				checkingBalance, f.getAmount(), checking.getServiceCharge(), 
+				(f.getAmount() + checking.getServiceCharge())));
+	}
+	
+	//this method displays the savings withdrawal error
+	public void displaySavingsWithdrawalError(InsufficientFunds f) {
+
+		//opens JOptionPane to output the error
+		JOptionPane.showMessageDialog(null, String.format(
+				"Error: Insufficient funds available to complete withdrawal. "
+				+ "%n%nAvaiable savings account balance: $%,.2f "
+				+ "%nWithdrawal amount request: $%,.2f "
+				+ "%nService fee: $%.2f"
+				+ "%nTotal withdrawal amount: $%,.2f", savingsBalance, 
+				f.getAmount(), savings.getServiceCharge(), 
+				(f.getAmount() +  savings.getServiceCharge())));
+	}
+	
+	//this method displays the checking transfer error
+	public void displayCheckingTransferError(InsufficientFunds f) {
+		
+		//opens JOptionPane to display the error
+		JOptionPane.showMessageDialog(null, String.format(
+				"Error: Insufficient funds available in savings account to complete transfer. "
+				+ "%n%nAvaiable savings account balance: $%,.2f "
+				+ "%nWithdrawal amount request: $%,.2f ", 
+				savingsBalance, f.getAmount()));
+	}
+	
+	//this method displays the savings transfer error
+	public void displaySavingsTransferError(InsufficientFunds f) {
+		
+		//opens JOptionPane to display the error
+		JOptionPane.showMessageDialog(null, String.format(
+				"Error: Insufficient funds available in checking account to complete transfer. "
+				+ "%n%nAvaiable checking account balance: $%,.2f "
+				+ "%nWithdrawal amount request: $%,.2f ", 
+				checkingBalance, f.getAmount()));
+	}
+	
+	//this method displays the non numeric error
+	public void displayNonNumericError() {
+		
+		//opens JOptionPane to display the error
+		JOptionPane.showMessageDialog(null, "Error: input is not a numeric value.");
+	}
+	
+	//this method displays the non incremented by 20 error
+	public void displayNotIncrementedBy20Error() {
+		
+		//opens JOptionPane to display the error
+		JOptionPane.showMessageDialog(null, "Error: input is not an increment of 20");
+	}
+	
+	//needed to implement the ActionListener class
+	@Override
+	public void actionPerformed(ActionEvent a){}
 	
 	//method that creates the frame
 	private void setFrame(int width, int height) {
 		setSize(width, height);
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}	
+	}
 	
-	//needed to implement the ActionListener class
-	@Override
-	public void actionPerformed(ActionEvent a){}
+	//this method displays the GUI
+	public void display() {
+		setVisible(true);
+	}
 	
 	//main method
 	public static void main(String[] args) {		

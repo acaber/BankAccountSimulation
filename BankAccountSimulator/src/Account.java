@@ -2,10 +2,8 @@
  * File Name: Account.java
  * Author: Rebecca Johnson
  * Date: July 6, 2017
- * Purpose: Simulates a bank account with a GUI that has the capabilities of 
- * 	withdrawing funds from a selected account, depositing funds to a selected account,
- * 	transferring funds to a selected account from the other account, and displaying
- * 	the balance of the selected account.
+ * Purpose: This class holds all the calculations to perform tasks
+ * 	requested by the buttons
  */
 
 public class Account{
