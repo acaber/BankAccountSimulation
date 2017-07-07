@@ -17,7 +17,8 @@ public class Account{
 	//holds the current number of withdrawals
 	private static int withdrawalAmount = 0;
 	
-	private static String name;
+	//holds account name
+	private String name;
 	
 	//constructor: assigns balance a value
 	public Account(String name, double balance) {
@@ -26,7 +27,7 @@ public class Account{
 	}
 	
 	//withdraw method: throws insufficient funds exception
-	public double withdrawAccount(double withdrawAmount) throws InsufficientFunds {
+	public double withdrawFromAccount(double withdrawAmount) throws InsufficientFunds {
 		
 		//validates that the withdrawal amount is less than the balance in the account
 		if(withdrawAmount <= balance) {
@@ -37,20 +38,21 @@ public class Account{
 			//calls checkWithdrawLimit method to see if service charge is incurred
 			checkWithdrawLimit(withdrawalAmount);
 			
-			//makes sure that there is enough money in account to withdraw from
+			//makes sure that there is enough money in the account to withdraw from
 			if((withdrawAmount + serviceCharge) > balance)
 				throw new InsufficientFunds(withdrawAmount);
 			else
 				balance = (balance - withdrawAmount) - serviceCharge;
 		}
 		else
+			//throws exception if there is not enough money in account
 			throw new InsufficientFunds(withdrawAmount);
 		
 		return balance;
 	}
 	
 	//deposit method
-	public double depositAccount(double depositAmount) {
+	public double depositToAccount(double depositAmount) {
 		balance += depositAmount; 
 		return balance;
 	}
@@ -58,28 +60,19 @@ public class Account{
 	//transfer method
 	public void transfer(Account to, Account from, double amount) throws InsufficientFunds {
 		
-		//will throw insufficient funds exception if the withdrawal amount exceeds the balance
+		//makes sure there is enough money in account to complete transfer
 		if(amount <= from.balance) {
-			from.balance = transferWithdraw(from, amount);
-			to.balance = transferDeposit(to, amount);
+			from.balance = (from.balance - amount);
+			to.balance = (to.balance + amount);
 		}
 		
 		else
+			//throws exception if there is not enough money in account
 			throw new InsufficientFunds(amount);
 	
 	}
 	
-	//transfer method for depositing money into selected account 
-	public double transferDeposit(Account to, double amount) {
-		return(to.balance + amount);
-	}
-	
-	//transfer method for withdrawing money out of other account
-	public double transferWithdraw(Account from, double amount) {
-		return (from.balance - amount);
-	}
-	
-	//adds service charge if user attempts to withdraw more than 4 times
+	//this method adds the service charge if the user attempts to withdraw more than 4 times
 	public void checkWithdrawLimit(int withdrawTimes) {
 		if(withdrawTimes > 4)
 			serviceCharge = 1.5;
@@ -87,22 +80,19 @@ public class Account{
 			serviceCharge = 0;
 	}
 	
-	//get service charge method
+	//this method returns the service charge
 	public double getServiceCharge() {
 		return serviceCharge;
 	}
 	
-	public void setBalance(double balance) {
-		this.balance = balance;
-	}
-	
-	//get balance method
+	//this method returns the account balance
 	public double getBalance() {
 		return balance;
 	}
 	
+	//this method returns the name of the account
 	public String getName(){
 		return name;
 	}
-
+	
 }
