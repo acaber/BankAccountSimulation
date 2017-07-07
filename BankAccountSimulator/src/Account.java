@@ -17,8 +17,11 @@ public class Account{
 	//holds the current number of withdrawals
 	private static int withdrawalAmount = 0;
 	
+	private static String name;
+	
 	//constructor: assigns balance a value
-	public Account(double balance) {
+	public Account(String name, double balance) {
+		this.name = name;
 		this.balance = balance;
 	}
 	
@@ -89,9 +92,17 @@ public class Account{
 		return serviceCharge;
 	}
 	
+	public void setBalance(double balance) {
+		this.balance = balance;
+	}
+	
 	//get balance method
 	public double getBalance() {
 		return balance;
+	}
+	
+	public String getName(){
+		return name;
 	}
 
 }
